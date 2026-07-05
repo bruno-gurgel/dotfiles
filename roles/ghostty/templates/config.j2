@@ -1,0 +1,6 @@
+command = {{ '/bin/zsh' if ansible_os_family == 'Darwin' else '/usr/bin/zsh' }}
+font-family = MesloLGS NF
+
+# Shift+Enter sends kitty protocol sequence \e[13;2u
+# Claude Code uses this for multiline input (insert newline without submitting)
+keybind = shift+enter=text:\x1b[13;2u

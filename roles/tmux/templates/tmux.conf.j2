@@ -1,0 +1,82 @@
+{% set accent = '#9ece6a' if ansible_os_family == 'Darwin' else '#7aa2f7' %}
+# ── Prefix ────────────────────────────────────────────────────────────────────
+set -g prefix C-b
+bind C-b send-prefix
+unbind p
+bind p previous-window
+
+# ── General ───────────────────────────────────────────────────────────────────
+set -g mouse on
+set -g history-limit 50000
+set -g base-index 1
+setw -g pane-base-index 1
+set -g renumber-windows on
+set -g escape-time 0
+set -g focus-events on
+set -g extended-keys on
+
+# Pass escape sequences (cursor shape, graphics protocol, etc.) through to
+# the outer terminal — fixes flickering when opening neovim inside tmux
+set -g allow-passthrough on
+
+# ── Colors / terminal ─────────────────────────────────────────────────────────
+set -g default-terminal "tmux-256color"
+set -ag terminal-overrides ",*:RGB"
+set -ag terminal-overrides ",*:Tc"
+set -as terminal-features ",*:hyperlinks"
+set -ga terminal-overrides ',*:Ss=\E[%p1%d q:Se=\E[2 q'
+
+# ── Copy mode (vi keys + mouse) ───────────────────────────────────────────────
+setw -g mode-keys vi
+
+bind -T copy-mode-vi v   send-keys -X begin-selection
+bind -T copy-mode-vi C-v send-keys -X rectangle-toggle
+bind -T copy-mode-vi y   send-keys -X copy-pipe-and-cancel 'clipboard-copy'
+
+bind -T copy-mode-vi MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'clipboard-copy'
+bind -T copy-mode    MouseDragEnd1Pane send-keys -X copy-pipe-and-cancel 'clipboard-copy'
+
+# ── Splits & windows ──────────────────────────────────────────────────────────
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+bind c new-window -c "#{pane_current_path}"
+unbind '"'
+unbind %
+
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+bind -r H resize-pane -L 5
+bind -r J resize-pane -D 5
+bind -r K resize-pane -U 5
+bind -r L resize-pane -R 5
+
+# ── Sessionizer ───────────────────────────────────────────────────────────────
+bind -r f run-shell "tmux neww ~/.local/bin/tmux-sessionizer"
+
+# ── Plugins ───────────────────────────────────────────────────────────────────
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
+
+set -g @resurrect-capture-pane-contents 'on'
+set -g @continuum-restore 'on'
+set -g @continuum-save-interval '15'
+
+# ── Status bar ────────────────────────────────────────────────────────────────
+set -g status-position top
+set -g status-style "bg=#1a1a2e,fg=#a9b1d6"
+set -g status-left "#[fg={{ accent }},bold] #S #[fg=#3b3f54]│ "
+set -g status-right "#[fg=#3b3f54]│ #[fg=#a9b1d6]#{continuum_status} #[fg=#3b3f54]│ #[fg=#a9b1d6]%H:%M #[fg=#3b3f54]│ #[fg={{ accent }}]%d %b "
+set -g status-left-length 30
+
+set -g window-status-format "#[fg=#565f89] #W "
+set -g window-status-current-format "#[fg={{ accent }},bold] #W "
+
+set -g pane-border-style "fg=#3b3f54"
+set -g pane-active-border-style "fg={{ accent }}"
+
+run '~/.tmux/plugins/tpm/tpm'

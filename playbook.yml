@@ -1,0 +1,17 @@
+---
+- name: Set up local development environment
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_files:
+    - vars/main.yml
+
+  roles:
+    - { role: packages, tags: [packages] }
+    - { role: fonts,    tags: [fonts, skip_in_container] }
+    - { role: zsh,      tags: [zsh] }
+    - { role: tmux,     tags: [tmux] }
+    - { role: neovim,   tags: [neovim] }
+    - { role: ghostty,  tags: [ghostty, skip_in_container] }
+    - { role: mise,     tags: [mise] }
+    - { role: claude,   tags: [claude] }

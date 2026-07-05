@@ -1,0 +1,17 @@
+---
+- name: Check if nvim config already exists
+  stat:
+    path: "{{ ansible_env.HOME }}/.config/nvim"
+  register: nvim_config
+
+- name: Clone kickstart.nvim (only if no config present)
+  git:
+    repo: https://github.com/nvim-lua/kickstart.nvim.git
+    dest: "{{ ansible_env.HOME }}/.config/nvim"
+    depth: 1
+  when: not nvim_config.stat.exists
+
+- name: Note — nvim config already present, skipping clone
+  debug:
+    msg: "~/.config/nvim already exists — kickstart.nvim clone skipped. Delete it first to re-clone."
+  when: nvim_config.stat.exists

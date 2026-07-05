@@ -1,0 +1,53 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Auto-attach to tmux on terminal open
+if [ -z "$TMUX" ] && [ -t 1 ]; then
+  exec tmux new-session -A -s main
+fi
+
+export ZSH="$HOME/.oh-my-zsh"
+
+ZSH_THEME="powerlevel10k/powerlevel10k"
+
+plugins=(
+  git
+  zoxide
+  fzf
+  history-substring-search
+  colored-man-pages
+  extract
+  sudo
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+)
+
+source $ZSH/oh-my-zsh.sh
+
+export PATH="$HOME/.local/bin:$PATH"
+
+# mise version manager (node, python, etc.)
+[[ -f ~/.local/bin/mise ]] && eval "$(~/.local/bin/mise activate zsh)"
+
+# Better history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt HIST_IGNORE_ALL_DUPS HIST_IGNORE_SPACE SHARE_HISTORY
+
+# history-substring-search: bind up/down arrows
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+
+# Ctrl+Enter and Shift+Enter → insert literal newline
+# Ctrl+Enter: kitty protocol \e[13;5u  — used in shell
+# Shift+Enter: kitty protocol \e[13;2u — used by Claude Code for multiline input
+_insert_newline() { LBUFFER+=$'\n' }
+zle -N _insert_newline
+bindkey '\e[13;5u' _insert_newline
+bindkey '\e[13;2u' _insert_newline
+
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

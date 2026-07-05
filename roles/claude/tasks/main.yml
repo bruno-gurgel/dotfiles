@@ -1,0 +1,16 @@
+---
+- name: Check if Claude Code is already installed
+  shell: "{{ ansible_env.HOME }}/.local/bin/mise exec node -- claude --version"
+  register: claude_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Install Claude Code CLI via mise-managed npm
+  shell: "{{ ansible_env.HOME }}/.local/bin/mise exec node -- npm install -g @anthropic-ai/claude-code"
+  environment:
+    PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
+  when: claude_check.rc != 0
+
+- name: Remind to authenticate
+  debug:
+    msg: "Claude Code installed. Run `claude` to complete authentication."

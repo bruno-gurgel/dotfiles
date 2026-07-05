@@ -1,0 +1,28 @@
+---
+- name: Set font directory (Linux)
+  set_fact:
+    font_dir: "{{ ansible_env.HOME }}/.local/share/fonts"
+  when: ansible_os_family != "Darwin"
+
+- name: Set font directory (macOS)
+  set_fact:
+    font_dir: "{{ ansible_env.HOME }}/Library/Fonts"
+  when: ansible_os_family == "Darwin"
+
+- name: Ensure font directory exists
+  file:
+    path: "{{ font_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download MesloLGS Nerd Fonts (for Powerlevel10k)
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ font_dir }}/{{ item.name }}"
+    mode: '0644'
+  loop: "{{ meslo_fonts }}"
+
+- name: Refresh font cache (Linux)
+  command: fc-cache -fv
+  when: ansible_os_family != "Darwin"
+  changed_when: true

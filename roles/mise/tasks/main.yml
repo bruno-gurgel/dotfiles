@@ -1,0 +1,14 @@
+---
+- name: Install mise
+  shell: curl https://mise.run | sh
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/bin/mise"
+
+- name: Install Node.js LTS via mise
+  shell: "{{ ansible_env.HOME }}/.local/bin/mise install node@lts"
+  args:
+    creates: "{{ ansible_env.HOME }}/.local/share/mise/installs/node"
+
+- name: Set Node.js LTS as global default
+  shell: "{{ ansible_env.HOME }}/.local/bin/mise use --global node@lts"
+  changed_when: true

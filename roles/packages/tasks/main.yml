@@ -1,0 +1,88 @@
+---
+# ── Arch Linux ────────────────────────────────────────────────────────────────
+- name: Update pacman cache (Arch)
+  pacman:
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Archlinux"
+
+- name: Install packages (Arch)
+  pacman:
+    name: "{{ packages_arch }}"
+    state: present
+  become: true
+  when: ansible_os_family == "Archlinux"
+
+# ── Debian / Ubuntu ───────────────────────────────────────────────────────────
+- name: Update apt cache (Debian/Ubuntu)
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Install apt packages (Debian/Ubuntu)
+  apt:
+    name: "{{ packages_debian }}"
+    state: present
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Symlink fdfind → fd (Debian/Ubuntu)
+  file:
+    src: /usr/bin/fdfind
+    dest: /usr/local/bin/fd
+    state: link
+    force: true
+  become: true
+  when: ansible_os_family == "Debian"
+
+
+
+- name: Add GitHub CLI apt key (Debian/Ubuntu)
+  shell: |
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+      | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/githubcli-archive-keyring.gpg
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Add GitHub CLI apt repo (Debian/Ubuntu)
+  apt_repository:
+    repo: "deb [arch={{ ansible_architecture }} signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    filename: github-cli
+    state: present
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Install gh CLI (Debian/Ubuntu)
+  apt:
+    name: gh
+    state: present
+    update_cache: true
+  become: true
+  when: ansible_os_family == "Debian"
+
+- name: Note — install Ghostty manually on Debian/Ubuntu
+  debug:
+    msg: >
+      Ghostty is not in apt repos. Install via flatpak (`flatpak install flathub com.mitchellh.ghostty`)
+      or build from source: https://ghostty.org/docs/install/build
+  when: ansible_os_family == "Debian"
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+- name: Install Homebrew packages (macOS)
+  community.general.homebrew:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ packages_darwin }}"
+  when: ansible_os_family == "Darwin"
+
+- name: Install Ghostty cask (macOS)
+  community.general.homebrew_cask:
+    name: ghostty
+    state: present
+  when: ansible_os_family == "Darwin"
+  ignore_errors: true

@@ -1,0 +1,52 @@
+---
+packages_arch:
+  - neovim
+  - tmux
+  - zsh
+  - git
+  - curl
+  - wget
+  - fzf
+  - zoxide
+  - ripgrep
+  - fd
+  - github-cli
+  - ghostty
+  - unzip
+  - base-devel
+  - wl-clipboard
+
+packages_debian:
+  - neovim
+  - tmux
+  - zsh
+  - git
+  - curl
+  - wget
+  - fzf
+  - zoxide
+  - ripgrep
+  - fd-find
+  - unzip
+  - build-essential
+  - xclip
+
+packages_darwin:
+  - neovim
+  - tmux
+  - fzf
+  - zoxide
+  - ripgrep
+  - fd
+  - gh
+  - ghostty
+
+meslo_fonts:
+  - name: "MesloLGS NF Regular.ttf"
+    url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf"
+  - name: "MesloLGS NF Bold.ttf"
+    url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf"
+  - name: "MesloLGS NF Italic.ttf"
+    url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf"
+  - name: "MesloLGS NF Bold Italic.ttf"
+    url: "https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf"

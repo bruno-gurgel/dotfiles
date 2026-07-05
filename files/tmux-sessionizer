@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Directories to search — non-existent ones are silently skipped
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    selected=$(find "$HOME/code" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)
+fi
+
+[[ -z $selected ]] && exit 0
+
+selected_name=$(basename "$selected" | tr . _)
+
+# If session exists, just switch — preserves whatever layout is already there
+if tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux switch-client -t "$selected_name"
+    exit 0
+fi
+
+# New session: create standard 3-window layout
+tmux new-session -s "$selected_name" -c "$selected" -d -n 'nvim'
+tmux send-keys -t "$selected_name:nvim" 'nvim .' Enter
+
+tmux new-window -t "$selected_name" -c "$selected" -n 'claude'
+tmux send-keys -t "$selected_name:claude" 'claude' Enter
+
+tmux new-window -t "$selected_name" -c "$selected" -n 'shell'
+
+# Land on nvim
+tmux switch-client -t "$selected_name:nvim"

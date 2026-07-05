@@ -1,0 +1,34 @@
+---
+- name: Ensure ~/.local/bin exists
+  file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+- name: Deploy clipboard-copy script
+  copy:
+    src: clipboard-copy
+    dest: "{{ ansible_env.HOME }}/.local/bin/clipboard-copy"
+    mode: '0755'
+
+- name: Deploy tmux-sessionizer script
+  copy:
+    src: tmux-sessionizer
+    dest: "{{ ansible_env.HOME }}/.local/bin/tmux-sessionizer"
+    mode: '0755'
+
+- name: Deploy .tmux.conf (OS-aware accent color)
+  template:
+    src: tmux.conf.j2
+    dest: "{{ ansible_env.HOME }}/.tmux.conf"
+    backup: true
+
+- name: Clone TPM (Tmux Plugin Manager)
+  git:
+    repo: https://github.com/tmux-plugins/tpm.git
+    dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+    depth: 1
+
+- name: Install TPM plugins headlessly
+  shell: "{{ ansible_env.HOME }}/.tmux/plugins/tpm/bin/install_plugins"
+  changed_when: true
