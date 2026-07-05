@@ -33,6 +33,15 @@ export PATH="$HOME/.local/bin:$PATH"
 # mise version manager (node, python, etc.)
 [[ -f ~/.local/bin/mise ]] && eval "$(~/.local/bin/mise activate zsh)"
 
+# Editor
+export EDITOR='nvim'
+alias vi='nvim'
+alias vim='nvim'
+alias k='kubectl'
+
+# Claude Code
+export CLAUDE_CODE_NO_FLICKER=1
+
 # Better history
 HISTSIZE=50000
 SAVEHIST=50000
@@ -49,5 +58,8 @@ _insert_newline() { LBUFFER+=$'\n' }
 zle -N _insert_newline
 bindkey '\e[13;5u' _insert_newline
 bindkey '\e[13;2u' _insert_newline
+
+# Machine-local extras (work aliases, secrets, PATH tweaks) — never committed
+[ -f ~/.zshrc.local ] && source ~/.zshrc.local
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
