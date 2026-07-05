@@ -1,15 +1,30 @@
 ---
 - name: Check if Claude Code is already installed
-  shell: "{{ ansible_env.HOME }}/.local/bin/mise exec node -- claude --version"
-  register: claude_check
-  ignore_errors: true
-  changed_when: false
+  stat:
+    path: "{{ ansible_env.HOME }}/.local/bin/claude"
+  register: claude_bin
 
-- name: Install Claude Code CLI via mise-managed npm
-  shell: "{{ ansible_env.HOME }}/.local/bin/mise exec node -- npm install -g @anthropic-ai/claude-code"
-  environment:
-    PATH: "{{ ansible_env.HOME }}/.local/bin:{{ ansible_env.PATH }}"
-  when: claude_check.rc != 0
+- name: Install Claude Code (native installer)
+  shell: curl -fsSL https://claude.ai/install.sh | bash
+  when: not claude_bin.stat.exists
+
+- name: Ensure ~/.claude exists
+  file:
+    path: "{{ ansible_env.HOME }}/.claude"
+    state: directory
+    mode: '0755'
+
+- name: Deploy user-level settings.json
+  copy:
+    src: claude/settings.json
+    dest: "{{ ansible_env.HOME }}/.claude/settings.json"
+    backup: true
+
+- name: Deploy statusline script
+  copy:
+    src: claude/statusline.sh
+    dest: "{{ ansible_env.HOME }}/.claude/statusline.sh"
+    mode: '0755'
 
 - name: Remind to authenticate
   debug:

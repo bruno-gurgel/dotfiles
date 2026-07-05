@@ -12,6 +12,7 @@ packages_arch:
   - fd
   - github-cli
   - ghostty
+  - jq
   - unzip
   - base-devel
   - wl-clipboard
@@ -27,6 +28,7 @@ packages_debian:
   - zoxide
   - ripgrep
   - fd-find
+  - jq
   - unzip
   - build-essential
   - xclip
@@ -40,6 +42,7 @@ packages_darwin:
   - fd
   - gh
   - ghostty
+  - jq
 
 meslo_fonts:
   - name: "MesloLGS NF Regular.ttf"
