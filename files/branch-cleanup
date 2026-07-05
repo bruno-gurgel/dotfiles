@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+# Interactive git branch cleanup (shell port of the nvim BranchCleanup picker).
+#
+#   branch-cleanup          pick & delete local branches with fzf
+#   branch-cleanup --poi    run `gh poi` first (prunes branches merged on the remote)
+#
+# Keys inside fzf:
+#   Tab     multi-select
+#   Enter   delete selected (or highlighted) branches, after confirmation
+#   Ctrl-G  toggle preview: commit log ⇄ full diff vs main
+#   Ctrl-A  select all listed branches
+set -euo pipefail
+
+git rev-parse --git-dir >/dev/null 2>&1 || { echo "branch-cleanup: not a git repository" >&2; exit 1; }
+
+main_branch=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null | sed 's|^origin/||')
+main_branch=${main_branch:-main}
+current=$(git branch --show-current)
+
+if [[ "${1:-}" == "--poi" ]]; then
+  if gh poi --help >/dev/null 2>&1; then
+    gh poi
+  else
+    echo "branch-cleanup: gh poi extension not installed (gh extension install seachicken/gh-poi)" >&2
+  fi
+fi
+
+branches=$(git for-each-ref --format='%(refname:short)' refs/heads/ \
+  | grep -vxF -e "$main_branch" -e "$current" || true)
+
+if [[ -z "$branches" ]]; then
+  echo "No branches to clean up."
+  exit 0
+fi
+
+selected=$(echo "$branches" | fzf --multi --reverse \
+  --header 'Tab: select │ Enter: delete │ Ctrl-G: log⇄diff preview │ Ctrl-A: select all' \
+  --preview "git log --oneline --graph --color=always -20 $main_branch..{} 2>/dev/null || git log --oneline --color=always -20 {}" \
+  --bind "ctrl-g:change-preview(git diff --color=always $main_branch...{} 2>/dev/null | head -500)" \
+  --bind 'ctrl-a:select-all') || exit 0
+
+[[ -z "$selected" ]] && exit 0
+
+echo "Will delete:"
+echo "$selected" | sed 's/^/  /'
+printf 'Confirm? [y/N] '
+read -r ans
+[[ "$ans" == [yY] ]] || { echo "Aborted."; exit 0; }
+
+echo "$selected" | while IFS= read -r branch; do
+  git branch -D "$branch" && echo "deleted: $branch"
+done

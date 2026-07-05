@@ -24,6 +24,18 @@
     dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
     depth: 1
 
+- name: Ensure ~/.local/bin exists
+  file:
+    path: "{{ ansible_env.HOME }}/.local/bin"
+    state: directory
+    mode: '0755'
+
+- name: Deploy branch-cleanup script
+  copy:
+    src: branch-cleanup
+    dest: "{{ ansible_env.HOME }}/.local/bin/branch-cleanup"
+    mode: '0755'
+
 - name: Deploy .zshrc
   copy:
     src: zshrc
