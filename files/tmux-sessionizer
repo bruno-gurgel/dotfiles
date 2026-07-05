@@ -1,15 +1,25 @@
 #!/usr/bin/env bash
 
-# Directories to search — non-existent ones are silently skipped
+# Directories to search — non-existent ones are silently skipped.
+# Repos live at ~/code/<repo>; parallel checkouts at ~/code/<repo>.worktrees/<branch>.
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    selected=$(find "$HOME/code" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | fzf)
+    selected=$( { find "$HOME/code" -mindepth 1 -maxdepth 1 -type d -not -name '*.worktrees' 2>/dev/null
+                  find "$HOME/code" -mindepth 2 -maxdepth 2 -type d -path '*.worktrees/*' 2>/dev/null
+                } | fzf)
 fi
 
 [[ -z $selected ]] && exit 0
 
-selected_name=$(basename "$selected" | tr . _)
+# Worktrees get "<branch>@<repo>" session names so they don't collide
+if [[ $selected == *.worktrees/* ]]; then
+    repo=$(basename "$(dirname "$selected")" .worktrees)
+    selected_name="$(basename "$selected")@$repo"
+else
+    selected_name=$(basename "$selected")
+fi
+selected_name=$(echo "$selected_name" | tr .: __)
 
 # If session exists, just switch — preserves whatever layout is already there
 if tmux has-session -t="$selected_name" 2>/dev/null; then

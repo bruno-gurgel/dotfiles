@@ -53,6 +53,9 @@ bind -r J resize-pane -D 5
 bind -r K resize-pane -U 5
 bind -r L resize-pane -R 5
 
+# Toggle between the two most recent windows (default `l` is used for panes)
+bind Tab last-window
+
 # ── Sessionizer ───────────────────────────────────────────────────────────────
 bind -r f run-shell "tmux neww ~/.local/bin/tmux-sessionizer"
 
